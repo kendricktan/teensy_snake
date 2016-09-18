@@ -1,4 +1,9 @@
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
 #include <avr/io.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
 #include <stdlib.h>
 
@@ -24,7 +29,7 @@ struct Snek
 
 // Global variables
 // LED screen is 48x84
-#define DELAY 190
+#define DELAY 100
 #define SNEKMAXSIZE 100
 #define SNEKWIDTH 3
 #define STARTSCREENHEIGHT 12
@@ -39,6 +44,36 @@ int seed_time = 42;
 enum Directions DIRECTION;
 struct Snek SNEK[SNEKMAXSIZE];
 struct Snek SNEKFOOD;
+
+// Analogue read
+uint16_t adc_read(uint8_t ch) {
+	// select the corresponding channel 0~7
+	// ANDing with '7' will always keep the value
+	// of 'ch' between 0 and 7
+	ch &= 0b00000111;  // AND operation with 7
+	ADMUX = (ADMUX & 0xF8)|ch;     // clears the bottom 3 bits before ORing
+
+	// start single conversion
+	// write '1' to ADSC
+	ADCSRA |= (1<<ADSC);
+
+	// wait for conversion to complete
+	// ADSC becomes '0' again
+	// till then, run loop continuously
+	while(ADCSRA & (1<<ADSC));
+
+	return (ADC);
+}
+
+// Reads pot
+int pot_position() {
+	uint16_t adc = adc_read(1);
+	
+	float max_adc = 1023.0;
+	long max_lcd_adc = (adc*(long)(LCD_X - 12)) / max_adc;
+	
+	return max_lcd_adc + 2;
+}
 
 // Draws snake
 void draw_snek_body(unsigned char x, unsigned char y)
@@ -90,9 +125,12 @@ void move_snek_body()
 }
 
 // Checks if snake self collided
-unsigned char snek_suicide(){
-    for(unsigned char i = 1; i < SNEK_CUR_LENGTH; i++){
-        if (SNEK[0].x == SNEK[i].x && SNEK[0].y == SNEK[i].y){
+unsigned char snek_suicide()
+{
+    for (unsigned char i = 1; i < SNEK_CUR_LENGTH; i++)
+    {
+        if (SNEK[0].x == SNEK[i].x && SNEK[0].y == SNEK[i].y)
+        {
             return 1;
         }
     }
@@ -101,12 +139,15 @@ unsigned char snek_suicide(){
 
 // Checks if newly spawn food is in snek
 // can't have that can we
-unsigned char is_food_in_snek(){
-    for (unsigned char i = 0; i < SNEK_CUR_LENGTH; i++){
-        if (SNEK[0].x == SNEKFOOD.x && SNEK[0].y == SNEKFOOD.y){
+unsigned char is_food_in_snek()
+{
+    for (unsigned char i = 0; i < SNEK_CUR_LENGTH; i++)
+    {
+        if (SNEK[0].x == SNEKFOOD.x && SNEK[0].y == SNEKFOOD.y)
+        {
             return 1;
         }
-    } 
+    }
     return 0;
 }
 
@@ -169,6 +210,17 @@ void setup()
     // Turn off led
     PORTB = 0;
 
+    // Initialising ADC with a pre-scaler of 128.
+    ADMUX = (1 << REFS0);
+    ADCSRA = (1 << ADEN) | (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0);
+
+    // Setup TIMER0 and add it to the interrupt register.
+    TCCR0B |= ((1 << CS02) | (1 << CS00));
+    TIMSK0 = (1 << TOIE0);
+
+    // Enable interrupts globally.
+    sei();
+
     // Reset snek position
     reset();
 }
@@ -210,8 +262,9 @@ void update_screen()
     show_screen();
 }
 
+// Interrupt that
 // Checks for user input
-void get_inputs()
+ISR(TIMER0_OVF_vect)
 {
     // Left
     if ((PINB >> 1) & 1)
@@ -248,16 +301,18 @@ void update_game()
         SCORE += 1;
         SNEK_CUR_LENGTH += 1;
         new_snek_food_location();
-    
+
         //check new snek food location
-        while(is_food_in_snek() || SNEKFOOD.x < STARTSCREENWIDTH || SNEKFOOD.x > SCREENWIDTH-3 || SNEKFOOD.y < STARTSCREENHEIGHT || SNEKFOOD.y > SCREENHEIGHT -3){
+        while (is_food_in_snek() || SNEKFOOD.x <= STARTSCREENWIDTH || SNEKFOOD.x >= SCREENWIDTH - 3 || SNEKFOOD.y <= STARTSCREENHEIGHT || SNEKFOOD.y >= SCREENHEIGHT - 3)
+        {
             seed_time += 1;
             new_snek_food_location();
         }
     }
 
     // Check snek collide
-    if (snek_suicide()){
+    if (snek_suicide())
+    {
         LIVES -= 1;
         DIRECTION = IDLE;
         reset();
@@ -320,11 +375,9 @@ int main(void)
     // Game loop
     while (!GAME_OVER)
     {
-        // Get Inputs
-        get_inputs();
-
         // Update game engine
-        if (DIRECTION != IDLE){
+        if (DIRECTION != IDLE)
+        {
             update_game();
         }
 
@@ -332,6 +385,29 @@ int main(void)
         update_screen();
 
         _delay_ms(DELAY);
+
+        // POT VALUE between 0 < POT VALUE 74
+        int pval = pot_position();
+        if (pval > 10 && pval <= 20){
+            _delay_ms(50);
+        }
+        if (pval > 20 && pval <= 30){
+            _delay_ms(100);
+        }
+        if (pval > 30 && pval <= 40){
+            _delay_ms(150);
+        }
+        if (pval > 40 && pval <= 50){
+            _delay_ms(200);
+        }
+        if (pval > 50 && pval <= 60){
+            _delay_ms(250);
+        }
+        if (pval > 60){
+            _delay_ms(300);
+        }
+        
+
         seed_time += 1;
     }
 
