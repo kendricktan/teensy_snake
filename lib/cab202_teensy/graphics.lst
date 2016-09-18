@@ -1,0 +1,1528 @@
+   1               		.file	"graphics.c"
+   2               	__SP_H__ = 0x3e
+   3               	__SP_L__ = 0x3d
+   4               	__SREG__ = 0x3f
+   5               	__tmp_reg__ = 0
+   6               	__zero_reg__ = 1
+   7               		.text
+   8               	.Ltext0:
+   9               		.cfi_sections	.debug_frame
+  10               		.section	.text.show_screen,"ax",@progbits
+  11               	.global	show_screen
+  13               	show_screen:
+  14               	.LFB1:
+  15               		.file 1 "graphics.c"
+   1:graphics.c    **** /*
+   2:graphics.c    **** *	CAB202 Teensy Library: 'cab202_teensy'
+   3:graphics.c    **** *	graphics.c
+   4:graphics.c    **** *
+   5:graphics.c    **** *	B.Talbot, September 2015
+   6:graphics.c    **** *	Queensland University of Technology
+   7:graphics.c    **** */
+   8:graphics.c    **** #include <avr/pgmspace.h>
+   9:graphics.c    **** #include "graphics.h"
+  10:graphics.c    **** #include "macros.h"
+  11:graphics.c    **** 
+  12:graphics.c    **** unsigned char screen_buffer[LCD_BUFFER_SIZE];
+  13:graphics.c    **** 
+  14:graphics.c    **** /*
+  15:graphics.c    ****  * Function implementations
+  16:graphics.c    ****  */
+  17:graphics.c    **** void show_screen(void) {
+  16               		.loc 1 17 0
+  17               		.cfi_startproc
+  18 0000 CF93      		push r28
+  19               	.LCFI0:
+  20               		.cfi_def_cfa_offset 3
+  21               		.cfi_offset 28, -2
+  22 0002 DF93      		push r29
+  23               	.LCFI1:
+  24               		.cfi_def_cfa_offset 4
+  25               		.cfi_offset 29, -3
+  26               	/* prologue: function */
+  27               	/* frame size = 0 */
+  28               	/* stack size = 2 */
+  29               	.L__stack_usage = 2
+  18:graphics.c    **** 	// Reset our position in the LCD RAM
+  19:graphics.c    **** 	lcd_position(0,0);
+  30               		.loc 1 19 0
+  31 0004 60E0      		ldi r22,0
+  32 0006 80E0      		ldi r24,0
+  33 0008 0E94 0000 		call lcd_position
+  34               	.LVL0:
+  35 000c C0E0      		ldi r28,lo8(screen_buffer)
+  36 000e D0E0      		ldi r29,hi8(screen_buffer)
+  37               	.LVL1:
+  38               	.L2:
+  20:graphics.c    **** 
+  21:graphics.c    **** 	// Iterate through our buffer and write each byte to the LCD.
+  22:graphics.c    **** 	unsigned int i;
+  23:graphics.c    **** 	for(i = 0; i < LCD_BUFFER_SIZE; i++){
+  24:graphics.c    **** 		lcd_write(LCD_D, screen_buffer[i]);
+  39               		.loc 1 24 0 discriminator 3
+  40 0010 6991      		ld r22,Y+
+  41               	.LVL2:
+  42 0012 81E0      		ldi r24,lo8(1)
+  43 0014 0E94 0000 		call lcd_write
+  44               	.LVL3:
+  23:graphics.c    **** 		lcd_write(LCD_D, screen_buffer[i]);
+  45               		.loc 1 23 0 discriminator 3
+  46 0018 80E0      		ldi r24,hi8(screen_buffer+504)
+  47 001a C030      		cpi r28,lo8(screen_buffer+504)
+  48 001c D807      		cpc r29,r24
+  49 001e 01F4      		brne .L2
+  50               	/* epilogue start */
+  25:graphics.c    **** 	}
+  26:graphics.c    **** }
+  51               		.loc 1 26 0
+  52 0020 DF91      		pop r29
+  53 0022 CF91      		pop r28
+  54               	.LVL4:
+  55 0024 0895      		ret
+  56               		.cfi_endproc
+  57               	.LFE1:
+  59               		.section	.text.clear_screen,"ax",@progbits
+  60               	.global	clear_screen
+  62               	clear_screen:
+  63               	.LFB2:
+  27:graphics.c    **** 
+  28:graphics.c    **** void clear_screen(void) {
+  64               		.loc 1 28 0
+  65               		.cfi_startproc
+  66               	/* prologue: function */
+  67               	/* frame size = 0 */
+  68               	/* stack size = 0 */
+  69               	.L__stack_usage = 0
+  70               	.LVL5:
+  71 0000 E0E0      		ldi r30,lo8(screen_buffer)
+  72 0002 F0E0      		ldi r31,hi8(screen_buffer)
+  73               	.LVL6:
+  74               	.L6:
+  29:graphics.c    **** 	// Set every byte in the buffer to 0b00000000
+  30:graphics.c    **** 	unsigned int i;
+  31:graphics.c    **** 	for(i = 0; i < LCD_BUFFER_SIZE; i++){
+  32:graphics.c    **** 		 screen_buffer[i] = 0;
+  75               		.loc 1 32 0 discriminator 3
+  76 0004 1192      		st Z+,__zero_reg__
+  77               	.LVL7:
+  31:graphics.c    **** 		 screen_buffer[i] = 0;
+  78               		.loc 1 31 0 discriminator 3
+  79 0006 80E0      		ldi r24,hi8(screen_buffer+504)
+  80 0008 E030      		cpi r30,lo8(screen_buffer+504)
+  81 000a F807      		cpc r31,r24
+  82 000c 01F4      		brne .L6
+  83               	/* epilogue start */
+  33:graphics.c    **** 	}
+  34:graphics.c    **** }
+  84               		.loc 1 34 0
+  85 000e 0895      		ret
+  86               		.cfi_endproc
+  87               	.LFE2:
+  89               		.section	.text.set_pixel,"ax",@progbits
+  90               	.global	set_pixel
+  92               	set_pixel:
+  93               	.LFB3:
+  35:graphics.c    **** void set_pixel(unsigned char x, unsigned char y, unsigned char value){
+  94               		.loc 1 35 0
+  95               		.cfi_startproc
+  96               	.LVL8:
+  97               	/* prologue: function */
+  98               	/* frame size = 0 */
+  99               	/* stack size = 0 */
+ 100               	.L__stack_usage = 0
+ 101 0000 982F      		mov r25,r24
+  36:graphics.c    **** 	// Sanity check (bad things happen otherwise...)
+  37:graphics.c    **** 	if (x >= LCD_X || y >= LCD_Y) {
+ 102               		.loc 1 37 0
+ 103 0002 8435      		cpi r24,lo8(84)
+ 104 0004 00F4      		brsh .L8
+ 105               		.loc 1 37 0 is_stmt 0 discriminator 1
+ 106 0006 6033      		cpi r22,lo8(48)
+ 107 0008 00F4      		brsh .L8
+ 108               	.LVL9:
+ 109               	.LBB4:
+ 110               	.LBB5:
+  38:graphics.c    **** 		return;
+  39:graphics.c    **** 	}
+  40:graphics.c    **** 
+  41:graphics.c    **** 	// Calculate the pixel 'subrow', within that LCD row
+  42:graphics.c    **** 	unsigned char row = y/8;
+ 111               		.loc 1 42 0 is_stmt 1
+ 112 000a 862F      		mov r24,r22
+ 113               	.LVL10:
+ 114 000c 8695      		lsr r24
+ 115 000e 8695      		lsr r24
+ 116 0010 8695      		lsr r24
+ 117               	.LVL11:
+  43:graphics.c    **** 	unsigned char subrow = y%8;
+ 118               		.loc 1 43 0
+ 119 0012 6770      		andi r22,lo8(7)
+ 120               	.LVL12:
+ 121 0014 24E5      		ldi r18,lo8(84)
+ 122 0016 829F      		mul r24,r18
+ 123 0018 F001      		movw r30,r0
+ 124 001a 1124      		clr __zero_reg__
+ 125 001c 892F      		mov r24,r25
+ 126               	.LVL13:
+ 127 001e 90E0      		ldi r25,0
+ 128               	.LVL14:
+  44:graphics.c    **** 
+  45:graphics.c    **** 	// Set that particular pixel in our screen buffer
+  46:graphics.c    **** 	if (value){
+  47:graphics.c    **** 		screen_buffer[row*84+x] |= (1 << subrow); 	//Set Pixel
+ 129               		.loc 1 47 0
+ 130 0020 8E0F      		add r24,r30
+ 131 0022 9F1F      		adc r25,r31
+ 132               	.LVL15:
+ 133 0024 FC01      		movw r30,r24
+ 134 0026 E050      		subi r30,lo8(-(screen_buffer))
+ 135 0028 F040      		sbci r31,hi8(-(screen_buffer))
+ 136 002a 81E0      		ldi r24,lo8(1)
+ 137 002c 90E0      		ldi r25,0
+ 138 002e 00C0      		rjmp 2f
+ 139               		1:
+ 140 0030 880F      		lsl r24
+ 141               		2:
+ 142 0032 6A95      		dec r22
+ 143 0034 02F4      		brpl 1b
+  46:graphics.c    **** 		screen_buffer[row*84+x] |= (1 << subrow); 	//Set Pixel
+ 144               		.loc 1 46 0
+ 145 0036 4423      		tst r20
+ 146 0038 01F0      		breq .L10
+ 147               		.loc 1 47 0
+ 148 003a 9081      		ld r25,Z
+ 149 003c 892B      		or r24,r25
+ 150 003e 00C0      		rjmp .L11
+ 151               	.L10:
+  48:graphics.c    **** 	} else {
+  49:graphics.c    **** 		screen_buffer[row*84+x] &= ~(1 << subrow); 	//Clear Pixel
+ 152               		.loc 1 49 0
+ 153 0040 8095      		com r24
+ 154 0042 9081      		ld r25,Z
+ 155 0044 8923      		and r24,r25
+ 156               	.L11:
+ 157 0046 8083      		st Z,r24
+ 158               	.LVL16:
+ 159               	.L8:
+ 160 0048 0895      		ret
+ 161               	.LBE5:
+ 162               	.LBE4:
+ 163               		.cfi_endproc
+ 164               	.LFE3:
+ 166               	.global	__floatsisf
+ 167               	.global	__divsf3
+ 168               	.global	__gesf2
+ 169               	.global	__addsf3
+ 170               	.global	__gtsf2
+ 171               	.global	__ltsf2
+ 172               	.global	__subsf3
+ 173               		.section	.text.draw_line,"ax",@progbits
+ 174               	.global	draw_line
+ 176               	draw_line:
+ 177               	.LFB4:
+  50:graphics.c    **** 	}
+  51:graphics.c    **** }
+  52:graphics.c    **** 
+  53:graphics.c    **** void draw_line(unsigned char x1, unsigned char y1, unsigned char x2, unsigned char y2) {
+ 178               		.loc 1 53 0
+ 179               		.cfi_startproc
+ 180               	.LVL17:
+ 181 0000 2F92      		push r2
+ 182               	.LCFI2:
+ 183               		.cfi_def_cfa_offset 3
+ 184               		.cfi_offset 2, -2
+ 185 0002 3F92      		push r3
+ 186               	.LCFI3:
+ 187               		.cfi_def_cfa_offset 4
+ 188               		.cfi_offset 3, -3
+ 189 0004 4F92      		push r4
+ 190               	.LCFI4:
+ 191               		.cfi_def_cfa_offset 5
+ 192               		.cfi_offset 4, -4
+ 193 0006 5F92      		push r5
+ 194               	.LCFI5:
+ 195               		.cfi_def_cfa_offset 6
+ 196               		.cfi_offset 5, -5
+ 197 0008 6F92      		push r6
+ 198               	.LCFI6:
+ 199               		.cfi_def_cfa_offset 7
+ 200               		.cfi_offset 6, -6
+ 201 000a 7F92      		push r7
+ 202               	.LCFI7:
+ 203               		.cfi_def_cfa_offset 8
+ 204               		.cfi_offset 7, -7
+ 205 000c 8F92      		push r8
+ 206               	.LCFI8:
+ 207               		.cfi_def_cfa_offset 9
+ 208               		.cfi_offset 8, -8
+ 209 000e 9F92      		push r9
+ 210               	.LCFI9:
+ 211               		.cfi_def_cfa_offset 10
+ 212               		.cfi_offset 9, -9
+ 213 0010 AF92      		push r10
+ 214               	.LCFI10:
+ 215               		.cfi_def_cfa_offset 11
+ 216               		.cfi_offset 10, -10
+ 217 0012 BF92      		push r11
+ 218               	.LCFI11:
+ 219               		.cfi_def_cfa_offset 12
+ 220               		.cfi_offset 11, -11
+ 221 0014 CF92      		push r12
+ 222               	.LCFI12:
+ 223               		.cfi_def_cfa_offset 13
+ 224               		.cfi_offset 12, -12
+ 225 0016 DF92      		push r13
+ 226               	.LCFI13:
+ 227               		.cfi_def_cfa_offset 14
+ 228               		.cfi_offset 13, -13
+ 229 0018 EF92      		push r14
+ 230               	.LCFI14:
+ 231               		.cfi_def_cfa_offset 15
+ 232               		.cfi_offset 14, -14
+ 233 001a FF92      		push r15
+ 234               	.LCFI15:
+ 235               		.cfi_def_cfa_offset 16
+ 236               		.cfi_offset 15, -15
+ 237 001c 0F93      		push r16
+ 238               	.LCFI16:
+ 239               		.cfi_def_cfa_offset 17
+ 240               		.cfi_offset 16, -16
+ 241 001e 1F93      		push r17
+ 242               	.LCFI17:
+ 243               		.cfi_def_cfa_offset 18
+ 244               		.cfi_offset 17, -17
+ 245 0020 CF93      		push r28
+ 246               	.LCFI18:
+ 247               		.cfi_def_cfa_offset 19
+ 248               		.cfi_offset 28, -18
+ 249 0022 DF93      		push r29
+ 250               	.LCFI19:
+ 251               		.cfi_def_cfa_offset 20
+ 252               		.cfi_offset 29, -19
+ 253 0024 CDB7      		in r28,__SP_L__
+ 254 0026 DEB7      		in r29,__SP_H__
+ 255               	.LCFI20:
+ 256               		.cfi_def_cfa_register 28
+ 257 0028 2D97      		sbiw r28,13
+ 258               	.LCFI21:
+ 259               		.cfi_def_cfa_offset 33
+ 260 002a 0FB6      		in __tmp_reg__,__SREG__
+ 261 002c F894      		cli
+ 262 002e DEBF      		out __SP_H__,r29
+ 263 0030 0FBE      		out __SREG__,__tmp_reg__
+ 264 0032 CDBF      		out __SP_L__,r28
+ 265               	/* prologue: function */
+ 266               	/* frame size = 13 */
+ 267               	/* stack size = 31 */
+ 268               	.L__stack_usage = 31
+ 269 0034 F82E      		mov r15,r24
+ 270 0036 262E      		mov r2,r22
+ 271 0038 D42E      		mov r13,r20
+ 272 003a E22E      		mov r14,r18
+  54:graphics.c    **** 	if (x1 == x2) {
+ 273               		.loc 1 54 0
+ 274 003c 8413      		cpse r24,r20
+ 275 003e 00C0      		rjmp .L13
+ 276               	.LBB6:
+  55:graphics.c    **** 		// Draw vertical line
+  56:graphics.c    **** 		for (int i = y1; (y2 > y1) ? i <= y2 : i >= y2; (y2 > y1) ? i++ : i-- ) {
+ 277               		.loc 1 56 0
+ 278 0040 C62E      		mov r12,r22
+ 279 0042 D12C      		mov r13,__zero_reg__
+ 280               	.LVL18:
+ 281 0044 022F      		mov r16,r18
+ 282 0046 10E0      		ldi r17,0
+ 283               	.LVL19:
+ 284               	.L14:
+ 285               		.loc 1 56 0 is_stmt 0 discriminator 5
+ 286 0048 2E14      		cp r2,r14
+ 287 004a 00F4      		brsh .L15
+ 288               		.loc 1 56 0 discriminator 6
+ 289 004c 0C15      		cp r16,r12
+ 290 004e 1D05      		cpc r17,r13
+ 291 0050 04F4      		brge .+2
+ 292 0052 00C0      		rjmp .L12
+  57:graphics.c    **** 			set_pixel(x1, i, 1);
+ 293               		.loc 1 57 0 is_stmt 1
+ 294 0054 41E0      		ldi r20,lo8(1)
+ 295 0056 6C2D      		mov r22,r12
+ 296 0058 8F2D      		mov r24,r15
+ 297 005a 0E94 0000 		call set_pixel
+ 298               	.LVL20:
+  56:graphics.c    **** 			set_pixel(x1, i, 1);
+ 299               		.loc 1 56 0
+ 300 005e 9FEF      		ldi r25,-1
+ 301 0060 C91A      		sub r12,r25
+ 302 0062 D90A      		sbc r13,r25
+ 303               	.LVL21:
+ 304 0064 00C0      		rjmp .L14
+ 305               	.L15:
+  56:graphics.c    **** 			set_pixel(x1, i, 1);
+ 306               		.loc 1 56 0 is_stmt 0 discriminator 7
+ 307 0066 C016      		cp r12,r16
+ 308 0068 D106      		cpc r13,r17
+ 309 006a 04F4      		brge .+2
+ 310 006c 00C0      		rjmp .L12
+ 311               		.loc 1 57 0 is_stmt 1
+ 312 006e 41E0      		ldi r20,lo8(1)
+ 313 0070 6C2D      		mov r22,r12
+ 314 0072 8F2D      		mov r24,r15
+ 315 0074 0E94 0000 		call set_pixel
+ 316               	.LVL22:
+  56:graphics.c    **** 			set_pixel(x1, i, 1);
+ 317               		.loc 1 56 0
+ 318 0078 E1E0      		ldi r30,1
+ 319 007a CE1A      		sub r12,r30
+ 320 007c D108      		sbc r13,__zero_reg__
+ 321               	.LVL23:
+ 322 007e 00C0      		rjmp .L14
+ 323               	.LVL24:
+ 324               	.L13:
+ 325 0080 082F      		mov r16,r24
+ 326 0082 10E0      		ldi r17,0
+ 327 0084 242F      		mov r18,r20
+ 328 0086 30E0      		ldi r19,0
+ 329 0088 3D87      		std Y+13,r19
+ 330 008a 2C87      		std Y+12,r18
+ 331               	.LBE6:
+  58:graphics.c    **** 		}
+  59:graphics.c    **** 	} else if (y1 == y2) {
+ 332               		.loc 1 59 0
+ 333 008c 6E11      		cpse r22,r14
+ 334 008e 00C0      		rjmp .L19
+ 335               	.L20:
+ 336               	.LVL25:
+ 337               	.LBB7:
+  60:graphics.c    **** 		// Draw horizontal line
+  61:graphics.c    **** 		for (int i = x1; (x2 > x1) ? i <= x2 : i >= x2; (x2 > x1) ? i++ : i-- ) {
+ 338               		.loc 1 61 0 discriminator 5
+ 339 0090 FD14      		cp r15,r13
+ 340 0092 00F4      		brsh .L21
+ 341               		.loc 1 61 0 is_stmt 0 discriminator 6
+ 342 0094 8C85      		ldd r24,Y+12
+ 343 0096 9D85      		ldd r25,Y+13
+ 344 0098 8017      		cp r24,r16
+ 345 009a 9107      		cpc r25,r17
+ 346 009c 04F4      		brge .+2
+ 347 009e 00C0      		rjmp .L12
+  62:graphics.c    **** 			set_pixel(i, y1, 1);
+ 348               		.loc 1 62 0 is_stmt 1
+ 349 00a0 41E0      		ldi r20,lo8(1)
+ 350 00a2 622D      		mov r22,r2
+ 351 00a4 802F      		mov r24,r16
+ 352 00a6 0E94 0000 		call set_pixel
+ 353               	.LVL26:
+  61:graphics.c    **** 			set_pixel(i, y1, 1);
+ 354               		.loc 1 61 0
+ 355 00aa 0F5F      		subi r16,-1
+ 356 00ac 1F4F      		sbci r17,-1
+ 357               	.LVL27:
+ 358 00ae 00C0      		rjmp .L20
+ 359               	.L21:
+  61:graphics.c    **** 			set_pixel(i, y1, 1);
+ 360               		.loc 1 61 0 is_stmt 0 discriminator 7
+ 361 00b0 EC85      		ldd r30,Y+12
+ 362 00b2 FD85      		ldd r31,Y+13
+ 363 00b4 0E17      		cp r16,r30
+ 364 00b6 1F07      		cpc r17,r31
+ 365 00b8 04F4      		brge .+2
+ 366 00ba 00C0      		rjmp .L12
+ 367               		.loc 1 62 0 is_stmt 1
+ 368 00bc 41E0      		ldi r20,lo8(1)
+ 369 00be 622D      		mov r22,r2
+ 370 00c0 802F      		mov r24,r16
+ 371 00c2 0E94 0000 		call set_pixel
+ 372               	.LVL28:
+  61:graphics.c    **** 			set_pixel(i, y1, 1);
+ 373               		.loc 1 61 0
+ 374 00c6 0150      		subi r16,1
+ 375 00c8 1109      		sbc r17,__zero_reg__
+ 376               	.LVL29:
+ 377 00ca 00C0      		rjmp .L20
+ 378               	.LVL30:
+ 379               	.L19:
+ 380               	.LBE7:
+ 381               	.LBB8:
+  63:graphics.c    **** 		}
+  64:graphics.c    **** 	} else {
+  65:graphics.c    **** 		// Get Bresenhaming...
+  66:graphics.c    **** 		float dx = x2-x1;
+ 382               		.loc 1 66 0
+ 383 00cc 6C85      		ldd r22,Y+12
+ 384 00ce 7D85      		ldd r23,Y+13
+ 385 00d0 601B      		sub r22,r16
+ 386 00d2 710B      		sbc r23,r17
+ 387 00d4 072E      		mov __tmp_reg__,r23
+ 388 00d6 000C      		lsl r0
+ 389 00d8 880B      		sbc r24,r24
+ 390 00da 990B      		sbc r25,r25
+ 391 00dc 0E94 0000 		call __floatsisf
+ 392               	.LVL31:
+ 393 00e0 2B01      		movw r4,r22
+ 394 00e2 3C01      		movw r6,r24
+ 395               	.LVL32:
+  67:graphics.c    **** 		float dy = y2-y1;
+ 396               		.loc 1 67 0
+ 397 00e4 2E2D      		mov r18,r14
+ 398 00e6 30E0      		ldi r19,0
+ 399 00e8 3E83      		std Y+6,r19
+ 400 00ea 2D83      		std Y+5,r18
+ 401 00ec 312C      		mov r3,__zero_reg__
+ 402 00ee B901      		movw r22,r18
+ 403 00f0 6219      		sub r22,r2
+ 404 00f2 7309      		sbc r23,r3
+ 405 00f4 072E      		mov __tmp_reg__,r23
+ 406 00f6 000C      		lsl r0
+ 407 00f8 880B      		sbc r24,r24
+ 408 00fa 990B      		sbc r25,r25
+ 409 00fc 0E94 0000 		call __floatsisf
+ 410               	.LVL33:
+ 411 0100 4B01      		movw r8,r22
+ 412 0102 5C01      		movw r10,r24
+ 413               	.LVL34:
+  68:graphics.c    **** 		float err = 0.0;
+  69:graphics.c    **** 		float derr = ABS(dy/dx);
+ 414               		.loc 1 69 0
+ 415 0104 A301      		movw r20,r6
+ 416 0106 9201      		movw r18,r4
+ 417 0108 0E94 0000 		call __divsf3
+ 418               	.LVL35:
+ 419 010c 6983      		std Y+1,r22
+ 420 010e 7A83      		std Y+2,r23
+ 421 0110 8B83      		std Y+3,r24
+ 422 0112 9C83      		std Y+4,r25
+ 423 0114 20E0      		ldi r18,0
+ 424 0116 30E0      		ldi r19,0
+ 425 0118 A901      		movw r20,r18
+ 426 011a 0E94 0000 		call __gesf2
+ 427               	.LVL36:
+ 428 011e 87FF      		sbrs r24,7
+ 429 0120 00C0      		rjmp .L24
+ 430               		.loc 1 69 0 is_stmt 0 discriminator 2
+ 431 0122 A301      		movw r20,r6
+ 432 0124 9201      		movw r18,r4
+ 433 0126 C501      		movw r24,r10
+ 434 0128 B401      		movw r22,r8
+ 435 012a 9058      		subi r25,0x80
+ 436 012c 0E94 0000 		call __divsf3
+ 437               	.LVL37:
+ 438 0130 6983      		std Y+1,r22
+ 439 0132 7A83      		std Y+2,r23
+ 440 0134 8B83      		std Y+3,r24
+ 441 0136 9C83      		std Y+4,r25
+ 442               	.L24:
+ 443               	.LVL38:
+  68:graphics.c    **** 		float err = 0.0;
+ 444               		.loc 1 68 0 is_stmt 1 discriminator 4
+ 445 0138 C12C      		mov r12,__zero_reg__
+ 446 013a D12C      		mov r13,__zero_reg__
+ 447 013c 7601      		movw r14,r12
+ 448               	.LVL39:
+ 449               	.L25:
+ 450               	.LBB9:
+  70:graphics.c    **** 
+  71:graphics.c    **** 		for (int x = x1, y = y1; (dx > 0) ? x<=x2 : x>=x2; (dx > 0) ? x++ : x--) {
+ 451               		.loc 1 71 0 discriminator 5
+ 452 013e 20E0      		ldi r18,0
+ 453 0140 30E0      		ldi r19,0
+ 454 0142 A901      		movw r20,r18
+ 455 0144 C301      		movw r24,r6
+ 456 0146 B201      		movw r22,r4
+ 457 0148 0E94 0000 		call __gtsf2
+ 458               	.LVL40:
+ 459 014c 1816      		cp __zero_reg__,r24
+ 460 014e 04F0      		brlt .+2
+ 461 0150 00C0      		rjmp .L49
+ 462               		.loc 1 71 0 is_stmt 0 discriminator 6
+ 463 0152 2C85      		ldd r18,Y+12
+ 464 0154 3D85      		ldd r19,Y+13
+ 465 0156 2017      		cp r18,r16
+ 466 0158 3107      		cpc r19,r17
+ 467 015a 04F4      		brge .+2
+ 468 015c 00C0      		rjmp .L12
+ 469               	.L42:
+  72:graphics.c    **** 			set_pixel(x, y, 1);
+ 470               		.loc 1 72 0 is_stmt 1
+ 471 015e 0B87      		std Y+11,r16
+ 472 0160 41E0      		ldi r20,lo8(1)
+ 473 0162 622D      		mov r22,r2
+ 474 0164 802F      		mov r24,r16
+ 475 0166 0E94 0000 		call set_pixel
+ 476               	.LVL41:
+  73:graphics.c    **** 			err += derr;
+ 477               		.loc 1 73 0
+ 478 016a 2981      		ldd r18,Y+1
+ 479 016c 3A81      		ldd r19,Y+2
+ 480 016e 4B81      		ldd r20,Y+3
+ 481 0170 5C81      		ldd r21,Y+4
+ 482 0172 C701      		movw r24,r14
+ 483 0174 B601      		movw r22,r12
+ 484 0176 0E94 0000 		call __addsf3
+ 485               	.LVL42:
+ 486               	.L50:
+  74:graphics.c    **** 			while (err >= 0.5 && ((dy > 0) ? y<=y2 : y>=y2) ) {
+  75:graphics.c    **** 				set_pixel(x, y, 1);
+  76:graphics.c    **** 				y += (dy > 0) - (dy < 0);
+  77:graphics.c    **** 				err -= 1.0;
+ 487               		.loc 1 77 0
+ 488 017a 6B01      		movw r12,r22
+ 489 017c 7C01      		movw r14,r24
+ 490               	.LVL43:
+  74:graphics.c    **** 			while (err >= 0.5 && ((dy > 0) ? y<=y2 : y>=y2) ) {
+ 491               		.loc 1 74 0
+ 492 017e 20E0      		ldi r18,0
+ 493 0180 30E0      		ldi r19,0
+ 494 0182 40E0      		ldi r20,0
+ 495 0184 5FE3      		ldi r21,lo8(63)
+ 496 0186 0E94 0000 		call __gesf2
+ 497               	.LVL44:
+ 498 018a 87FF      		sbrs r24,7
+ 499 018c 00C0      		rjmp .L29
+ 500               	.L35:
+  71:graphics.c    **** 			set_pixel(x, y, 1);
+ 501               		.loc 1 71 0
+ 502 018e 20E0      		ldi r18,0
+ 503 0190 30E0      		ldi r19,0
+ 504 0192 A901      		movw r20,r18
+ 505 0194 C301      		movw r24,r6
+ 506 0196 B201      		movw r22,r4
+ 507 0198 0E94 0000 		call __gtsf2
+ 508               	.LVL45:
+ 509 019c 1816      		cp __zero_reg__,r24
+ 510 019e 04F0      		brlt .+2
+ 511 01a0 00C0      		rjmp .L51
+  71:graphics.c    **** 			set_pixel(x, y, 1);
+ 512               		.loc 1 71 0 is_stmt 0 discriminator 2
+ 513 01a2 0F5F      		subi r16,-1
+ 514 01a4 1F4F      		sbci r17,-1
+ 515               	.LVL46:
+ 516 01a6 00C0      		rjmp .L25
+ 517               	.L29:
+  74:graphics.c    **** 			while (err >= 0.5 && ((dy > 0) ? y<=y2 : y>=y2) ) {
+ 518               		.loc 1 74 0 is_stmt 1 discriminator 1
+ 519 01a8 20E0      		ldi r18,0
+ 520 01aa 30E0      		ldi r19,0
+ 521 01ac A901      		movw r20,r18
+ 522 01ae C501      		movw r24,r10
+ 523 01b0 B401      		movw r22,r8
+ 524 01b2 0E94 0000 		call __gtsf2
+ 525               	.LVL47:
+ 526 01b6 1816      		cp __zero_reg__,r24
+ 527 01b8 04F4      		brge .L48
+  74:graphics.c    **** 			while (err >= 0.5 && ((dy > 0) ? y<=y2 : y>=y2) ) {
+ 528               		.loc 1 74 0 is_stmt 0 discriminator 2
+ 529 01ba 8D81      		ldd r24,Y+5
+ 530 01bc 9E81      		ldd r25,Y+6
+ 531 01be 8215      		cp r24,r2
+ 532 01c0 9305      		cpc r25,r3
+ 533 01c2 04F0      		brlt .L35
+ 534               	.L34:
+  75:graphics.c    **** 				y += (dy > 0) - (dy < 0);
+ 535               		.loc 1 75 0 is_stmt 1
+ 536 01c4 41E0      		ldi r20,lo8(1)
+ 537 01c6 622D      		mov r22,r2
+ 538 01c8 8B85      		ldd r24,Y+11
+ 539 01ca 0E94 0000 		call set_pixel
+ 540               	.LVL48:
+  76:graphics.c    **** 				err -= 1.0;
+ 541               		.loc 1 76 0
+ 542 01ce 81E0      		ldi r24,lo8(1)
+ 543 01d0 90E0      		ldi r25,0
+ 544 01d2 9887      		std Y+8,r25
+ 545 01d4 8F83      		std Y+7,r24
+ 546 01d6 20E0      		ldi r18,0
+ 547 01d8 30E0      		ldi r19,0
+ 548 01da A901      		movw r20,r18
+ 549 01dc C501      		movw r24,r10
+ 550 01de B401      		movw r22,r8
+ 551 01e0 0E94 0000 		call __gtsf2
+ 552               	.LVL49:
+ 553 01e4 1816      		cp __zero_reg__,r24
+ 554 01e6 04F0      		brlt .L27
+ 555 01e8 1886      		std Y+8,__zero_reg__
+ 556 01ea 1F82      		std Y+7,__zero_reg__
+ 557               	.L27:
+ 558 01ec E1E0      		ldi r30,lo8(1)
+ 559 01ee F0E0      		ldi r31,0
+ 560 01f0 FA87      		std Y+10,r31
+ 561 01f2 E987      		std Y+9,r30
+ 562 01f4 20E0      		ldi r18,0
+ 563 01f6 30E0      		ldi r19,0
+ 564 01f8 A901      		movw r20,r18
+ 565 01fa C501      		movw r24,r10
+ 566 01fc B401      		movw r22,r8
+ 567 01fe 0E94 0000 		call __ltsf2
+ 568               	.LVL50:
+ 569 0202 87FD      		sbrc r24,7
+ 570 0204 00C0      		rjmp .L28
+ 571 0206 1A86      		std Y+10,__zero_reg__
+ 572 0208 1986      		std Y+9,__zero_reg__
+ 573               	.L28:
+ 574 020a 8F81      		ldd r24,Y+7
+ 575 020c 9885      		ldd r25,Y+8
+ 576 020e 2985      		ldd r18,Y+9
+ 577 0210 3A85      		ldd r19,Y+10
+ 578 0212 821B      		sub r24,r18
+ 579 0214 930B      		sbc r25,r19
+ 580 0216 280E      		add r2,r24
+ 581 0218 391E      		adc r3,r25
+ 582               	.LVL51:
+ 583               		.loc 1 77 0
+ 584 021a 20E0      		ldi r18,0
+ 585 021c 30E0      		ldi r19,0
+ 586 021e 40E8      		ldi r20,lo8(-128)
+ 587 0220 5FE3      		ldi r21,lo8(63)
+ 588 0222 C701      		movw r24,r14
+ 589 0224 B601      		movw r22,r12
+ 590 0226 0E94 0000 		call __subsf3
+ 591               	.LVL52:
+ 592 022a 00C0      		rjmp .L50
+ 593               	.L48:
+  74:graphics.c    **** 				set_pixel(x, y, 1);
+ 594               		.loc 1 74 0 discriminator 3
+ 595 022c ED81      		ldd r30,Y+5
+ 596 022e FE81      		ldd r31,Y+6
+ 597 0230 2E16      		cp r2,r30
+ 598 0232 3F06      		cpc r3,r31
+ 599 0234 04F4      		brge .L34
+ 600 0236 00C0      		rjmp .L35
+ 601               	.L51:
+  71:graphics.c    **** 			set_pixel(x, y, 1);
+ 602               		.loc 1 71 0 discriminator 3
+ 603 0238 0150      		subi r16,1
+ 604 023a 1109      		sbc r17,__zero_reg__
+ 605               	.LVL53:
+ 606 023c 00C0      		rjmp .L25
+ 607               	.L49:
+  71:graphics.c    **** 			set_pixel(x, y, 1);
+ 608               		.loc 1 71 0 is_stmt 0 discriminator 7
+ 609 023e 8C85      		ldd r24,Y+12
+ 610 0240 9D85      		ldd r25,Y+13
+ 611 0242 0817      		cp r16,r24
+ 612 0244 1907      		cpc r17,r25
+ 613 0246 04F0      		brlt .+2
+ 614 0248 00C0      		rjmp .L42
+ 615               	.LVL54:
+ 616               	.L12:
+ 617               	/* epilogue start */
+ 618               	.LBE9:
+ 619               	.LBE8:
+  78:graphics.c    **** 			}
+  79:graphics.c    **** 		}
+  80:graphics.c    **** 	}
+  81:graphics.c    **** }
+ 620               		.loc 1 81 0 is_stmt 1
+ 621 024a 2D96      		adiw r28,13
+ 622 024c 0FB6      		in __tmp_reg__,__SREG__
+ 623 024e F894      		cli
+ 624 0250 DEBF      		out __SP_H__,r29
+ 625 0252 0FBE      		out __SREG__,__tmp_reg__
+ 626 0254 CDBF      		out __SP_L__,r28
+ 627 0256 DF91      		pop r29
+ 628 0258 CF91      		pop r28
+ 629 025a 1F91      		pop r17
+ 630 025c 0F91      		pop r16
+ 631 025e FF90      		pop r15
+ 632               	.LVL55:
+ 633 0260 EF90      		pop r14
+ 634               	.LVL56:
+ 635 0262 DF90      		pop r13
+ 636 0264 CF90      		pop r12
+ 637 0266 BF90      		pop r11
+ 638 0268 AF90      		pop r10
+ 639 026a 9F90      		pop r9
+ 640 026c 8F90      		pop r8
+ 641 026e 7F90      		pop r7
+ 642 0270 6F90      		pop r6
+ 643 0272 5F90      		pop r5
+ 644 0274 4F90      		pop r4
+ 645 0276 3F90      		pop r3
+ 646 0278 2F90      		pop r2
+ 647 027a 0895      		ret
+ 648               		.cfi_endproc
+ 649               	.LFE4:
+ 651               		.section	.text.draw_char,"ax",@progbits
+ 652               	.global	draw_char
+ 654               	draw_char:
+ 655               	.LFB5:
+  82:graphics.c    **** 
+  83:graphics.c    **** void draw_char(unsigned char top_left_x, unsigned char top_left_y, char character) {
+ 656               		.loc 1 83 0
+ 657               		.cfi_startproc
+ 658               	.LVL57:
+ 659 0000 7F92      		push r7
+ 660               	.LCFI22:
+ 661               		.cfi_def_cfa_offset 3
+ 662               		.cfi_offset 7, -2
+ 663 0002 8F92      		push r8
+ 664               	.LCFI23:
+ 665               		.cfi_def_cfa_offset 4
+ 666               		.cfi_offset 8, -3
+ 667 0004 9F92      		push r9
+ 668               	.LCFI24:
+ 669               		.cfi_def_cfa_offset 5
+ 670               		.cfi_offset 9, -4
+ 671 0006 AF92      		push r10
+ 672               	.LCFI25:
+ 673               		.cfi_def_cfa_offset 6
+ 674               		.cfi_offset 10, -5
+ 675 0008 BF92      		push r11
+ 676               	.LCFI26:
+ 677               		.cfi_def_cfa_offset 7
+ 678               		.cfi_offset 11, -6
+ 679 000a CF92      		push r12
+ 680               	.LCFI27:
+ 681               		.cfi_def_cfa_offset 8
+ 682               		.cfi_offset 12, -7
+ 683 000c DF92      		push r13
+ 684               	.LCFI28:
+ 685               		.cfi_def_cfa_offset 9
+ 686               		.cfi_offset 13, -8
+ 687 000e EF92      		push r14
+ 688               	.LCFI29:
+ 689               		.cfi_def_cfa_offset 10
+ 690               		.cfi_offset 14, -9
+ 691 0010 FF92      		push r15
+ 692               	.LCFI30:
+ 693               		.cfi_def_cfa_offset 11
+ 694               		.cfi_offset 15, -10
+ 695 0012 0F93      		push r16
+ 696               	.LCFI31:
+ 697               		.cfi_def_cfa_offset 12
+ 698               		.cfi_offset 16, -11
+ 699 0014 1F93      		push r17
+ 700               	.LCFI32:
+ 701               		.cfi_def_cfa_offset 13
+ 702               		.cfi_offset 17, -12
+ 703 0016 CF93      		push r28
+ 704               	.LCFI33:
+ 705               		.cfi_def_cfa_offset 14
+ 706               		.cfi_offset 28, -13
+ 707 0018 DF93      		push r29
+ 708               	.LCFI34:
+ 709               		.cfi_def_cfa_offset 15
+ 710               		.cfi_offset 29, -14
+ 711               	/* prologue: function */
+ 712               	/* frame size = 0 */
+ 713               	/* stack size = 13 */
+ 714               	.L__stack_usage = 13
+ 715 001a 982E      		mov r9,r24
+ 716 001c 862E      		mov r8,r22
+ 717               	.LVL58:
+ 718 001e 25E0      		ldi r18,lo8(5)
+ 719 0020 429F      		mul r20,r18
+ 720 0022 7001      		movw r14,r0
+ 721 0024 1124      		clr __zero_reg__
+ 722               		.loc 1 83 0
+ 723 0026 00E0      		ldi r16,0
+ 724 0028 10E0      		ldi r17,0
+ 725 002a 30EA      		ldi r19,-96
+ 726 002c E31A      		sub r14,r19
+ 727 002e F108      		sbc r15,__zero_reg__
+ 728               	.LBB10:
+ 729               	.LBB11:
+  84:graphics.c    **** 	int char_width = 5;
+  85:graphics.c    **** 	int char_height = 8;
+  86:graphics.c    **** 
+  87:graphics.c    **** 	// loop through each pixel in the character array and plot each one individually
+  88:graphics.c    **** 	for (unsigned char i = 0; i<char_width; i++) {
+  89:graphics.c    **** 		for (unsigned char j = 0; j<char_height; j++) {
+  90:graphics.c    **** 			set_pixel(top_left_x+i, top_left_y+j, (pgm_read_byte(&(ASCII[character - 0x20][i])) & (1 << j)) 
+ 730               		.loc 1 90 0
+ 731 0030 AA24      		clr r10
+ 732 0032 A394      		inc r10
+ 733 0034 B12C      		mov r11,__zero_reg__
+ 734               	.LVL59:
+ 735               	.L53:
+ 736 0036 C701      		movw r24,r14
+ 737 0038 800F      		add r24,r16
+ 738 003a 911F      		adc r25,r17
+ 739 003c 9C01      		movw r18,r24
+ 740 003e 2050      		subi r18,lo8(-(ASCII))
+ 741 0040 3040      		sbci r19,hi8(-(ASCII))
+ 742 0042 6901      		movw r12,r18
+ 743               	.LBE11:
+ 744               	.LBE10:
+  83:graphics.c    **** 	int char_width = 5;
+ 745               		.loc 1 83 0
+ 746 0044 C0E0      		ldi r28,0
+ 747 0046 D0E0      		ldi r29,0
+ 748 0048 792C      		mov r7,r9
+ 749 004a 700E      		add r7,r16
+ 750               	.L56:
+ 751               	.LVL60:
+ 752               	.LBB14:
+ 753               	.LBB13:
+  89:graphics.c    **** 			set_pixel(top_left_x+i, top_left_y+j, (pgm_read_byte(&(ASCII[character - 0x20][i])) & (1 << j)) 
+ 754               		.loc 1 89 0 discriminator 1
+ 755 004c C830      		cpi r28,8
+ 756 004e D105      		cpc r29,__zero_reg__
+ 757 0050 01F0      		breq .L57
+ 758               	.LVL61:
+ 759               	.LBB12:
+ 760               		.loc 1 90 0 discriminator 3
+ 761 0052 F601      		movw r30,r12
+ 762               	/* #APP */
+ 763               	 ;  90 "graphics.c" 1
+ 764 0054 4491      		lpm r20, Z
+ 765               		
+ 766               	 ;  0 "" 2
+ 767               	.LVL62:
+ 768               	/* #NOAPP */
+ 769               	.LBE12:
+ 770 0056 50E0      		ldi r21,0
+ 771 0058 9501      		movw r18,r10
+ 772 005a 0C2E      		mov r0,r28
+ 773 005c 00C0      		rjmp 2f
+ 774               		1:
+ 775 005e 220F      		lsl r18
+ 776 0060 331F      		rol r19
+ 777               		2:
+ 778 0062 0A94      		dec r0
+ 779 0064 02F4      		brpl 1b
+ 780 0066 4223      		and r20,r18
+ 781 0068 5323      		and r21,r19
+ 782               	.LVL63:
+ 783 006a 0C2E      		mov r0,r28
+ 784 006c 00C0      		rjmp 2f
+ 785               		1:
+ 786 006e 5595      		asr r21
+ 787 0070 4795      		ror r20
+ 788               		2:
+ 789 0072 0A94      		dec r0
+ 790 0074 02F4      		brpl 1b
+ 791 0076 6C2F      		mov r22,r28
+ 792 0078 680D      		add r22,r8
+ 793 007a 872D      		mov r24,r7
+ 794 007c 0E94 0000 		call set_pixel
+ 795               	.LVL64:
+ 796 0080 2196      		adiw r28,1
+ 797               	.LVL65:
+ 798 0082 00C0      		rjmp .L56
+ 799               	.LVL66:
+ 800               	.L57:
+ 801 0084 0F5F      		subi r16,-1
+ 802 0086 1F4F      		sbci r17,-1
+ 803               	.LVL67:
+ 804               	.LBE13:
+  88:graphics.c    **** 		for (unsigned char j = 0; j<char_height; j++) {
+ 805               		.loc 1 88 0 discriminator 2
+ 806 0088 0530      		cpi r16,5
+ 807 008a 1105      		cpc r17,__zero_reg__
+ 808 008c 01F4      		brne .L53
+ 809               	/* epilogue start */
+ 810               	.LBE14:
+  91:graphics.c    **** 		}
+  92:graphics.c    **** 	}
+  93:graphics.c    **** }
+ 811               		.loc 1 93 0
+ 812 008e DF91      		pop r29
+ 813 0090 CF91      		pop r28
+ 814               	.LVL68:
+ 815 0092 1F91      		pop r17
+ 816 0094 0F91      		pop r16
+ 817               	.LVL69:
+ 818 0096 FF90      		pop r15
+ 819 0098 EF90      		pop r14
+ 820 009a DF90      		pop r13
+ 821 009c CF90      		pop r12
+ 822 009e BF90      		pop r11
+ 823 00a0 AF90      		pop r10
+ 824 00a2 9F90      		pop r9
+ 825               	.LVL70:
+ 826 00a4 8F90      		pop r8
+ 827               	.LVL71:
+ 828 00a6 7F90      		pop r7
+ 829 00a8 0895      		ret
+ 830               		.cfi_endproc
+ 831               	.LFE5:
+ 833               		.section	.text.draw_string,"ax",@progbits
+ 834               	.global	draw_string
+ 836               	draw_string:
+ 837               	.LFB6:
+  94:graphics.c    **** 
+  95:graphics.c    **** void draw_string(unsigned char top_left_x, unsigned char top_left_y, char *characters) {
+ 838               		.loc 1 95 0
+ 839               		.cfi_startproc
+ 840               	.LVL72:
+ 841 0000 0F93      		push r16
+ 842               	.LCFI35:
+ 843               		.cfi_def_cfa_offset 3
+ 844               		.cfi_offset 16, -2
+ 845 0002 1F93      		push r17
+ 846               	.LCFI36:
+ 847               		.cfi_def_cfa_offset 4
+ 848               		.cfi_offset 17, -3
+ 849 0004 CF93      		push r28
+ 850               	.LCFI37:
+ 851               		.cfi_def_cfa_offset 5
+ 852               		.cfi_offset 28, -4
+ 853 0006 DF93      		push r29
+ 854               	.LCFI38:
+ 855               		.cfi_def_cfa_offset 6
+ 856               		.cfi_offset 29, -5
+ 857               	/* prologue: function */
+ 858               	/* frame size = 0 */
+ 859               	/* stack size = 4 */
+ 860               	.L__stack_usage = 4
+ 861 0008 D62F      		mov r29,r22
+ 862 000a 8A01      		movw r16,r20
+ 863               	.LVL73:
+  96:graphics.c    **** 	unsigned char i = 0;
+  97:graphics.c    **** 
+  98:graphics.c    **** 	// Draw each character until the null terminator is reached
+  99:graphics.c    **** 	while (*characters != 0) {
+ 864               		.loc 1 99 0
+ 865 000c C82F      		mov r28,r24
+ 866               	.LVL74:
+ 867               	.L59:
+ 868 000e F801      		movw r30,r16
+ 869 0010 4191      		ld r20,Z+
+ 870 0012 8F01      		movw r16,r30
+ 871               	.LVL75:
+ 872 0014 4423      		tst r20
+ 873 0016 01F0      		breq .L61
+ 100:graphics.c    **** 		draw_char(top_left_x+i*5, top_left_y, *(characters));
+ 874               		.loc 1 100 0
+ 875 0018 6D2F      		mov r22,r29
+ 876 001a 8C2F      		mov r24,r28
+ 877 001c 0E94 0000 		call draw_char
+ 878               	.LVL76:
+ 879 0020 CB5F      		subi r28,lo8(-(5))
+ 880 0022 00C0      		rjmp .L59
+ 881               	.LVL77:
+ 882               	.L61:
+ 883               	/* epilogue start */
+ 101:graphics.c    **** 
+ 102:graphics.c    **** 		// Add a column of spaces here if you want to space out the lettering.
+ 103:graphics.c    **** 	    // (see lcd.c for a hint on how to do this)
+ 104:graphics.c    **** 
+ 105:graphics.c    **** 		characters++;
+ 106:graphics.c    **** 		i++;
+ 107:graphics.c    **** 	}
+ 108:graphics.c    **** }
+ 884               		.loc 1 108 0
+ 885 0024 DF91      		pop r29
+ 886               	.LVL78:
+ 887 0026 CF91      		pop r28
+ 888 0028 1F91      		pop r17
+ 889 002a 0F91      		pop r16
+ 890               	.LVL79:
+ 891 002c 0895      		ret
+ 892               		.cfi_endproc
+ 893               	.LFE6:
+ 895               		.comm	screen_buffer,504,1
+ 896               		.section	.progmem.data,"a",@progbits
+ 899               	ASCII:
+ 900 0000 00        		.byte	0
+ 901 0001 00        		.byte	0
+ 902 0002 00        		.byte	0
+ 903 0003 00        		.byte	0
+ 904 0004 00        		.byte	0
+ 905 0005 00        		.byte	0
+ 906 0006 00        		.byte	0
+ 907 0007 5F        		.byte	95
+ 908 0008 00        		.byte	0
+ 909 0009 00        		.byte	0
+ 910 000a 00        		.byte	0
+ 911 000b 07        		.byte	7
+ 912 000c 00        		.byte	0
+ 913 000d 07        		.byte	7
+ 914 000e 00        		.byte	0
+ 915 000f 14        		.byte	20
+ 916 0010 7F        		.byte	127
+ 917 0011 14        		.byte	20
+ 918 0012 7F        		.byte	127
+ 919 0013 14        		.byte	20
+ 920 0014 24        		.byte	36
+ 921 0015 2A        		.byte	42
+ 922 0016 7F        		.byte	127
+ 923 0017 2A        		.byte	42
+ 924 0018 12        		.byte	18
+ 925 0019 23        		.byte	35
+ 926 001a 13        		.byte	19
+ 927 001b 08        		.byte	8
+ 928 001c 64        		.byte	100
+ 929 001d 62        		.byte	98
+ 930 001e 36        		.byte	54
+ 931 001f 49        		.byte	73
+ 932 0020 55        		.byte	85
+ 933 0021 22        		.byte	34
+ 934 0022 50        		.byte	80
+ 935 0023 00        		.byte	0
+ 936 0024 05        		.byte	5
+ 937 0025 03        		.byte	3
+ 938 0026 00        		.byte	0
+ 939 0027 00        		.byte	0
+ 940 0028 00        		.byte	0
+ 941 0029 1C        		.byte	28
+ 942 002a 22        		.byte	34
+ 943 002b 41        		.byte	65
+ 944 002c 00        		.byte	0
+ 945 002d 00        		.byte	0
+ 946 002e 41        		.byte	65
+ 947 002f 22        		.byte	34
+ 948 0030 1C        		.byte	28
+ 949 0031 00        		.byte	0
+ 950 0032 14        		.byte	20
+ 951 0033 08        		.byte	8
+ 952 0034 3E        		.byte	62
+ 953 0035 08        		.byte	8
+ 954 0036 14        		.byte	20
+ 955 0037 08        		.byte	8
+ 956 0038 08        		.byte	8
+ 957 0039 3E        		.byte	62
+ 958 003a 08        		.byte	8
+ 959 003b 08        		.byte	8
+ 960 003c 00        		.byte	0
+ 961 003d 50        		.byte	80
+ 962 003e 30        		.byte	48
+ 963 003f 00        		.byte	0
+ 964 0040 00        		.byte	0
+ 965 0041 08        		.byte	8
+ 966 0042 08        		.byte	8
+ 967 0043 08        		.byte	8
+ 968 0044 08        		.byte	8
+ 969 0045 08        		.byte	8
+ 970 0046 00        		.byte	0
+ 971 0047 60        		.byte	96
+ 972 0048 60        		.byte	96
+ 973 0049 00        		.byte	0
+ 974 004a 00        		.byte	0
+ 975 004b 20        		.byte	32
+ 976 004c 10        		.byte	16
+ 977 004d 08        		.byte	8
+ 978 004e 04        		.byte	4
+ 979 004f 02        		.byte	2
+ 980 0050 3E        		.byte	62
+ 981 0051 51        		.byte	81
+ 982 0052 49        		.byte	73
+ 983 0053 45        		.byte	69
+ 984 0054 3E        		.byte	62
+ 985 0055 00        		.byte	0
+ 986 0056 42        		.byte	66
+ 987 0057 7F        		.byte	127
+ 988 0058 40        		.byte	64
+ 989 0059 00        		.byte	0
+ 990 005a 42        		.byte	66
+ 991 005b 61        		.byte	97
+ 992 005c 51        		.byte	81
+ 993 005d 49        		.byte	73
+ 994 005e 46        		.byte	70
+ 995 005f 21        		.byte	33
+ 996 0060 41        		.byte	65
+ 997 0061 45        		.byte	69
+ 998 0062 4B        		.byte	75
+ 999 0063 31        		.byte	49
+ 1000 0064 18        		.byte	24
+ 1001 0065 14        		.byte	20
+ 1002 0066 12        		.byte	18
+ 1003 0067 7F        		.byte	127
+ 1004 0068 10        		.byte	16
+ 1005 0069 27        		.byte	39
+ 1006 006a 45        		.byte	69
+ 1007 006b 45        		.byte	69
+ 1008 006c 45        		.byte	69
+ 1009 006d 39        		.byte	57
+ 1010 006e 3C        		.byte	60
+ 1011 006f 4A        		.byte	74
+ 1012 0070 49        		.byte	73
+ 1013 0071 49        		.byte	73
+ 1014 0072 30        		.byte	48
+ 1015 0073 01        		.byte	1
+ 1016 0074 71        		.byte	113
+ 1017 0075 09        		.byte	9
+ 1018 0076 05        		.byte	5
+ 1019 0077 03        		.byte	3
+ 1020 0078 36        		.byte	54
+ 1021 0079 49        		.byte	73
+ 1022 007a 49        		.byte	73
+ 1023 007b 49        		.byte	73
+ 1024 007c 36        		.byte	54
+ 1025 007d 06        		.byte	6
+ 1026 007e 49        		.byte	73
+ 1027 007f 49        		.byte	73
+ 1028 0080 29        		.byte	41
+ 1029 0081 1E        		.byte	30
+ 1030 0082 00        		.byte	0
+ 1031 0083 36        		.byte	54
+ 1032 0084 36        		.byte	54
+ 1033 0085 00        		.byte	0
+ 1034 0086 00        		.byte	0
+ 1035 0087 00        		.byte	0
+ 1036 0088 56        		.byte	86
+ 1037 0089 36        		.byte	54
+ 1038 008a 00        		.byte	0
+ 1039 008b 00        		.byte	0
+ 1040 008c 08        		.byte	8
+ 1041 008d 14        		.byte	20
+ 1042 008e 22        		.byte	34
+ 1043 008f 41        		.byte	65
+ 1044 0090 00        		.byte	0
+ 1045 0091 14        		.byte	20
+ 1046 0092 14        		.byte	20
+ 1047 0093 14        		.byte	20
+ 1048 0094 14        		.byte	20
+ 1049 0095 14        		.byte	20
+ 1050 0096 00        		.byte	0
+ 1051 0097 41        		.byte	65
+ 1052 0098 22        		.byte	34
+ 1053 0099 14        		.byte	20
+ 1054 009a 08        		.byte	8
+ 1055 009b 02        		.byte	2
+ 1056 009c 01        		.byte	1
+ 1057 009d 51        		.byte	81
+ 1058 009e 09        		.byte	9
+ 1059 009f 06        		.byte	6
+ 1060 00a0 32        		.byte	50
+ 1061 00a1 49        		.byte	73
+ 1062 00a2 79        		.byte	121
+ 1063 00a3 41        		.byte	65
+ 1064 00a4 3E        		.byte	62
+ 1065 00a5 7E        		.byte	126
+ 1066 00a6 11        		.byte	17
+ 1067 00a7 11        		.byte	17
+ 1068 00a8 11        		.byte	17
+ 1069 00a9 7E        		.byte	126
+ 1070 00aa 7F        		.byte	127
+ 1071 00ab 49        		.byte	73
+ 1072 00ac 49        		.byte	73
+ 1073 00ad 49        		.byte	73
+ 1074 00ae 36        		.byte	54
+ 1075 00af 3E        		.byte	62
+ 1076 00b0 41        		.byte	65
+ 1077 00b1 41        		.byte	65
+ 1078 00b2 41        		.byte	65
+ 1079 00b3 22        		.byte	34
+ 1080 00b4 7F        		.byte	127
+ 1081 00b5 41        		.byte	65
+ 1082 00b6 41        		.byte	65
+ 1083 00b7 22        		.byte	34
+ 1084 00b8 1C        		.byte	28
+ 1085 00b9 7F        		.byte	127
+ 1086 00ba 49        		.byte	73
+ 1087 00bb 49        		.byte	73
+ 1088 00bc 49        		.byte	73
+ 1089 00bd 41        		.byte	65
+ 1090 00be 7F        		.byte	127
+ 1091 00bf 09        		.byte	9
+ 1092 00c0 09        		.byte	9
+ 1093 00c1 09        		.byte	9
+ 1094 00c2 01        		.byte	1
+ 1095 00c3 3E        		.byte	62
+ 1096 00c4 41        		.byte	65
+ 1097 00c5 49        		.byte	73
+ 1098 00c6 49        		.byte	73
+ 1099 00c7 7A        		.byte	122
+ 1100 00c8 7F        		.byte	127
+ 1101 00c9 08        		.byte	8
+ 1102 00ca 08        		.byte	8
+ 1103 00cb 08        		.byte	8
+ 1104 00cc 7F        		.byte	127
+ 1105 00cd 00        		.byte	0
+ 1106 00ce 41        		.byte	65
+ 1107 00cf 7F        		.byte	127
+ 1108 00d0 41        		.byte	65
+ 1109 00d1 00        		.byte	0
+ 1110 00d2 20        		.byte	32
+ 1111 00d3 40        		.byte	64
+ 1112 00d4 41        		.byte	65
+ 1113 00d5 3F        		.byte	63
+ 1114 00d6 01        		.byte	1
+ 1115 00d7 7F        		.byte	127
+ 1116 00d8 08        		.byte	8
+ 1117 00d9 14        		.byte	20
+ 1118 00da 22        		.byte	34
+ 1119 00db 41        		.byte	65
+ 1120 00dc 7F        		.byte	127
+ 1121 00dd 40        		.byte	64
+ 1122 00de 40        		.byte	64
+ 1123 00df 40        		.byte	64
+ 1124 00e0 40        		.byte	64
+ 1125 00e1 7F        		.byte	127
+ 1126 00e2 02        		.byte	2
+ 1127 00e3 0C        		.byte	12
+ 1128 00e4 02        		.byte	2
+ 1129 00e5 7F        		.byte	127
+ 1130 00e6 7F        		.byte	127
+ 1131 00e7 04        		.byte	4
+ 1132 00e8 08        		.byte	8
+ 1133 00e9 10        		.byte	16
+ 1134 00ea 7F        		.byte	127
+ 1135 00eb 3E        		.byte	62
+ 1136 00ec 41        		.byte	65
+ 1137 00ed 41        		.byte	65
+ 1138 00ee 41        		.byte	65
+ 1139 00ef 3E        		.byte	62
+ 1140 00f0 7F        		.byte	127
+ 1141 00f1 09        		.byte	9
+ 1142 00f2 09        		.byte	9
+ 1143 00f3 09        		.byte	9
+ 1144 00f4 06        		.byte	6
+ 1145 00f5 3E        		.byte	62
+ 1146 00f6 41        		.byte	65
+ 1147 00f7 51        		.byte	81
+ 1148 00f8 21        		.byte	33
+ 1149 00f9 5E        		.byte	94
+ 1150 00fa 7F        		.byte	127
+ 1151 00fb 09        		.byte	9
+ 1152 00fc 19        		.byte	25
+ 1153 00fd 29        		.byte	41
+ 1154 00fe 46        		.byte	70
+ 1155 00ff 46        		.byte	70
+ 1156 0100 49        		.byte	73
+ 1157 0101 49        		.byte	73
+ 1158 0102 49        		.byte	73
+ 1159 0103 31        		.byte	49
+ 1160 0104 01        		.byte	1
+ 1161 0105 01        		.byte	1
+ 1162 0106 7F        		.byte	127
+ 1163 0107 01        		.byte	1
+ 1164 0108 01        		.byte	1
+ 1165 0109 3F        		.byte	63
+ 1166 010a 40        		.byte	64
+ 1167 010b 40        		.byte	64
+ 1168 010c 40        		.byte	64
+ 1169 010d 3F        		.byte	63
+ 1170 010e 1F        		.byte	31
+ 1171 010f 20        		.byte	32
+ 1172 0110 40        		.byte	64
+ 1173 0111 20        		.byte	32
+ 1174 0112 1F        		.byte	31
+ 1175 0113 3F        		.byte	63
+ 1176 0114 40        		.byte	64
+ 1177 0115 38        		.byte	56
+ 1178 0116 40        		.byte	64
+ 1179 0117 3F        		.byte	63
+ 1180 0118 63        		.byte	99
+ 1181 0119 14        		.byte	20
+ 1182 011a 08        		.byte	8
+ 1183 011b 14        		.byte	20
+ 1184 011c 63        		.byte	99
+ 1185 011d 07        		.byte	7
+ 1186 011e 08        		.byte	8
+ 1187 011f 70        		.byte	112
+ 1188 0120 08        		.byte	8
+ 1189 0121 07        		.byte	7
+ 1190 0122 61        		.byte	97
+ 1191 0123 51        		.byte	81
+ 1192 0124 49        		.byte	73
+ 1193 0125 45        		.byte	69
+ 1194 0126 43        		.byte	67
+ 1195 0127 00        		.byte	0
+ 1196 0128 7F        		.byte	127
+ 1197 0129 41        		.byte	65
+ 1198 012a 41        		.byte	65
+ 1199 012b 00        		.byte	0
+ 1200 012c 02        		.byte	2
+ 1201 012d 04        		.byte	4
+ 1202 012e 08        		.byte	8
+ 1203 012f 10        		.byte	16
+ 1204 0130 20        		.byte	32
+ 1205 0131 00        		.byte	0
+ 1206 0132 41        		.byte	65
+ 1207 0133 41        		.byte	65
+ 1208 0134 7F        		.byte	127
+ 1209 0135 00        		.byte	0
+ 1210 0136 04        		.byte	4
+ 1211 0137 02        		.byte	2
+ 1212 0138 01        		.byte	1
+ 1213 0139 02        		.byte	2
+ 1214 013a 04        		.byte	4
+ 1215 013b 40        		.byte	64
+ 1216 013c 40        		.byte	64
+ 1217 013d 40        		.byte	64
+ 1218 013e 40        		.byte	64
+ 1219 013f 40        		.byte	64
+ 1220 0140 00        		.byte	0
+ 1221 0141 01        		.byte	1
+ 1222 0142 02        		.byte	2
+ 1223 0143 04        		.byte	4
+ 1224 0144 00        		.byte	0
+ 1225 0145 20        		.byte	32
+ 1226 0146 54        		.byte	84
+ 1227 0147 54        		.byte	84
+ 1228 0148 54        		.byte	84
+ 1229 0149 78        		.byte	120
+ 1230 014a 7F        		.byte	127
+ 1231 014b 48        		.byte	72
+ 1232 014c 44        		.byte	68
+ 1233 014d 44        		.byte	68
+ 1234 014e 38        		.byte	56
+ 1235 014f 38        		.byte	56
+ 1236 0150 44        		.byte	68
+ 1237 0151 44        		.byte	68
+ 1238 0152 44        		.byte	68
+ 1239 0153 20        		.byte	32
+ 1240 0154 38        		.byte	56
+ 1241 0155 44        		.byte	68
+ 1242 0156 44        		.byte	68
+ 1243 0157 48        		.byte	72
+ 1244 0158 7F        		.byte	127
+ 1245 0159 38        		.byte	56
+ 1246 015a 54        		.byte	84
+ 1247 015b 54        		.byte	84
+ 1248 015c 54        		.byte	84
+ 1249 015d 18        		.byte	24
+ 1250 015e 08        		.byte	8
+ 1251 015f 7E        		.byte	126
+ 1252 0160 09        		.byte	9
+ 1253 0161 01        		.byte	1
+ 1254 0162 02        		.byte	2
+ 1255 0163 0C        		.byte	12
+ 1256 0164 52        		.byte	82
+ 1257 0165 52        		.byte	82
+ 1258 0166 52        		.byte	82
+ 1259 0167 3E        		.byte	62
+ 1260 0168 7F        		.byte	127
+ 1261 0169 08        		.byte	8
+ 1262 016a 04        		.byte	4
+ 1263 016b 04        		.byte	4
+ 1264 016c 78        		.byte	120
+ 1265 016d 00        		.byte	0
+ 1266 016e 44        		.byte	68
+ 1267 016f 7D        		.byte	125
+ 1268 0170 40        		.byte	64
+ 1269 0171 00        		.byte	0
+ 1270 0172 20        		.byte	32
+ 1271 0173 40        		.byte	64
+ 1272 0174 44        		.byte	68
+ 1273 0175 3D        		.byte	61
+ 1274 0176 00        		.byte	0
+ 1275 0177 7F        		.byte	127
+ 1276 0178 10        		.byte	16
+ 1277 0179 28        		.byte	40
+ 1278 017a 44        		.byte	68
+ 1279 017b 00        		.byte	0
+ 1280 017c 00        		.byte	0
+ 1281 017d 41        		.byte	65
+ 1282 017e 7F        		.byte	127
+ 1283 017f 40        		.byte	64
+ 1284 0180 00        		.byte	0
+ 1285 0181 7C        		.byte	124
+ 1286 0182 04        		.byte	4
+ 1287 0183 18        		.byte	24
+ 1288 0184 04        		.byte	4
+ 1289 0185 78        		.byte	120
+ 1290 0186 7C        		.byte	124
+ 1291 0187 08        		.byte	8
+ 1292 0188 04        		.byte	4
+ 1293 0189 04        		.byte	4
+ 1294 018a 78        		.byte	120
+ 1295 018b 38        		.byte	56
+ 1296 018c 44        		.byte	68
+ 1297 018d 44        		.byte	68
+ 1298 018e 44        		.byte	68
+ 1299 018f 38        		.byte	56
+ 1300 0190 7C        		.byte	124
+ 1301 0191 14        		.byte	20
+ 1302 0192 14        		.byte	20
+ 1303 0193 14        		.byte	20
+ 1304 0194 08        		.byte	8
+ 1305 0195 08        		.byte	8
+ 1306 0196 14        		.byte	20
+ 1307 0197 14        		.byte	20
+ 1308 0198 18        		.byte	24
+ 1309 0199 7C        		.byte	124
+ 1310 019a 7C        		.byte	124
+ 1311 019b 08        		.byte	8
+ 1312 019c 04        		.byte	4
+ 1313 019d 04        		.byte	4
+ 1314 019e 08        		.byte	8
+ 1315 019f 48        		.byte	72
+ 1316 01a0 54        		.byte	84
+ 1317 01a1 54        		.byte	84
+ 1318 01a2 54        		.byte	84
+ 1319 01a3 20        		.byte	32
+ 1320 01a4 04        		.byte	4
+ 1321 01a5 3F        		.byte	63
+ 1322 01a6 44        		.byte	68
+ 1323 01a7 40        		.byte	64
+ 1324 01a8 20        		.byte	32
+ 1325 01a9 3C        		.byte	60
+ 1326 01aa 40        		.byte	64
+ 1327 01ab 40        		.byte	64
+ 1328 01ac 20        		.byte	32
+ 1329 01ad 7C        		.byte	124
+ 1330 01ae 1C        		.byte	28
+ 1331 01af 20        		.byte	32
+ 1332 01b0 40        		.byte	64
+ 1333 01b1 20        		.byte	32
+ 1334 01b2 1C        		.byte	28
+ 1335 01b3 3C        		.byte	60
+ 1336 01b4 40        		.byte	64
+ 1337 01b5 30        		.byte	48
+ 1338 01b6 40        		.byte	64
+ 1339 01b7 3C        		.byte	60
+ 1340 01b8 44        		.byte	68
+ 1341 01b9 28        		.byte	40
+ 1342 01ba 10        		.byte	16
+ 1343 01bb 28        		.byte	40
+ 1344 01bc 44        		.byte	68
+ 1345 01bd 0C        		.byte	12
+ 1346 01be 50        		.byte	80
+ 1347 01bf 50        		.byte	80
+ 1348 01c0 50        		.byte	80
+ 1349 01c1 3C        		.byte	60
+ 1350 01c2 44        		.byte	68
+ 1351 01c3 64        		.byte	100
+ 1352 01c4 54        		.byte	84
+ 1353 01c5 4C        		.byte	76
+ 1354 01c6 44        		.byte	68
+ 1355 01c7 00        		.byte	0
+ 1356 01c8 08        		.byte	8
+ 1357 01c9 36        		.byte	54
+ 1358 01ca 41        		.byte	65
+ 1359 01cb 00        		.byte	0
+ 1360 01cc 00        		.byte	0
+ 1361 01cd 00        		.byte	0
+ 1362 01ce 7F        		.byte	127
+ 1363 01cf 00        		.byte	0
+ 1364 01d0 00        		.byte	0
+ 1365 01d1 00        		.byte	0
+ 1366 01d2 41        		.byte	65
+ 1367 01d3 36        		.byte	54
+ 1368 01d4 08        		.byte	8
+ 1369 01d5 00        		.byte	0
+ 1370 01d6 10        		.byte	16
+ 1371 01d7 08        		.byte	8
+ 1372 01d8 08        		.byte	8
+ 1373 01d9 10        		.byte	16
+ 1374 01da 08        		.byte	8
+ 1375 01db 78        		.byte	120
+ 1376 01dc 46        		.byte	70
+ 1377 01dd 41        		.byte	65
+ 1378 01de 46        		.byte	70
+ 1379 01df 78        		.byte	120
+ 1380               		.text
+ 1381               	.Letext0:
+ 1382               		.file 2 "/usr/lib/avr/include/stdint.h"
+ 1383               		.file 3 "ascii_font.h"
+ 1384               		.file 4 "lcd.h"
+DEFINED SYMBOLS
+                            *ABS*:0000000000000000 graphics.c
+     /tmp/ccLNzZZJ.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccLNzZZJ.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccLNzZZJ.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccLNzZZJ.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccLNzZZJ.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccLNzZZJ.s:13     .text.show_screen:0000000000000000 show_screen
+                            *COM*:00000000000001f8 screen_buffer
+     /tmp/ccLNzZZJ.s:62     .text.clear_screen:0000000000000000 clear_screen
+     /tmp/ccLNzZZJ.s:92     .text.set_pixel:0000000000000000 set_pixel
+     /tmp/ccLNzZZJ.s:176    .text.draw_line:0000000000000000 draw_line
+     /tmp/ccLNzZZJ.s:654    .text.draw_char:0000000000000000 draw_char
+     /tmp/ccLNzZZJ.s:899    .progmem.data:0000000000000000 ASCII
+     /tmp/ccLNzZZJ.s:836    .text.draw_string:0000000000000000 draw_string
+
+UNDEFINED SYMBOLS
+lcd_position
+lcd_write
+__floatsisf
+__divsf3
+__gesf2
+__addsf3
+__gtsf2
+__ltsf2
+__subsf3
+__do_clear_bss
