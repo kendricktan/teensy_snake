@@ -27,12 +27,15 @@ struct Snek
 #define DELAY 190
 #define SNEKMAXSIZE 100
 #define SNEKWIDTH 3
+#define STARTSCREENHEIGHT 12
+#define STARTSCREENWIDTH 3
 #define SCREENWIDTH 84
 #define SCREENHEIGHT 48
 unsigned char GAME_OVER = 0;
 unsigned char LIVES = 5;
 unsigned char SCORE = 0;
 unsigned char SNEK_CUR_LENGTH = 2;
+int seed_time = 42;
 enum Directions DIRECTION;
 struct Snek SNEK[SNEKMAXSIZE];
 struct Snek SNEKFOOD;
@@ -70,9 +73,9 @@ void draw_snek()
 void reset_snek()
 {
     SNEK_CUR_LENGTH = 2;
-    for (unsigned char i = 0; i < 2; i++)
+    for (unsigned char i = 0; i < SNEK_CUR_LENGTH; i++)
     {
-        SNEK[i].x = 50 + (i * SNEKWIDTH);
+        SNEK[i].x = 48 + (i * SNEKWIDTH);
         SNEK[i].y = 30;
     }
 }
@@ -86,14 +89,43 @@ void move_snek_body()
     }
 }
 
-// Snek food
-void new_snek_food_location(){
+// Checks if snake self collided
+unsigned char snek_suicide(){
+    for(unsigned char i = 1; i < SNEK_CUR_LENGTH; i++){
+        if (SNEK[0].x == SNEK[i].x && SNEK[0].y == SNEK[i].y){
+            return 1;
+        }
+    }
+    return 0;
 }
 
-void draw_snek_food(){
+// Checks if newly spawn food is in snek
+// can't have that can we
+unsigned char is_food_in_snek(){
+    for (unsigned char i = 0; i < SNEK_CUR_LENGTH; i++){
+        if (SNEK[0].x == SNEKFOOD.x && SNEK[0].y == SNEKFOOD.y){
+            return 1;
+        }
+    } 
+    return 0;
+}
+
+// Snek food
+void new_snek_food_location()
+{
+    srand(seed_time);
+    SNEKFOOD.x = (rand() % SCREENWIDTH) + STARTSCREENWIDTH;
+    SNEKFOOD.y = (rand() % SCREENHEIGHT) + STARTSCREENHEIGHT;
+
+    // Want multiples of 3
+    SNEKFOOD.y -= SNEKFOOD.y % 3;
+    SNEKFOOD.x -= SNEKFOOD.x % 3;
+}
+
+void draw_snek_food()
+{
     draw_snek_body(SNEKFOOD.x, SNEKFOOD.y);
 }
-
 
 // Welcome screen
 void welcome_screen()
@@ -114,6 +146,9 @@ void reset()
 
     // Snek position
     reset_snek();
+
+    // Snek food
+    new_snek_food_location();
 }
 
 // Setup
@@ -142,22 +177,24 @@ void setup()
 void show_status()
 {
     // Pretty display
-    char status_char[7] = "   ( )";
-    status_char[4] = LIVES + '0';
+    char status_char[9] = "S:   L: ";
+    status_char[7] = LIVES + '0';
 
     if (SCORE < 10)
     {
-        status_char[0] = '0';
-        status_char[1] = SCORE + '0';
+        status_char[2] = '0';
+        status_char[3] = SCORE + '0';
         draw_string(1, 1, status_char);
     }
 
     else
     {
-        status_char[0] = (SCORE / 10) + '0';
-        status_char[1] = (SCORE % 10) + '0';
+        status_char[2] = (SCORE / 10) + '0';
+        status_char[3] = (SCORE % 10) + '0';
         draw_string(1, 1, status_char);
     }
+
+    draw_line(0, 10, SCREENWIDTH, 10);
 }
 
 // Update Screen
@@ -166,8 +203,8 @@ void update_screen()
 {
     clear_screen();
 
-    draw_snek();
     draw_snek_food();
+    draw_snek();
     show_status();
 
     show_screen();
@@ -204,6 +241,29 @@ void get_inputs()
 // Updates game engine
 void update_game()
 {
+    // Check snek food
+    if (SNEKFOOD.x == SNEK[0].x && SNEK[0].y == SNEKFOOD.y)
+    {
+
+        SCORE += 1;
+        SNEK_CUR_LENGTH += 1;
+        new_snek_food_location();
+    
+        //check new snek food location
+        while(is_food_in_snek() || SNEKFOOD.x < STARTSCREENWIDTH || SNEKFOOD.x > SCREENWIDTH-3 || SNEKFOOD.y < STARTSCREENHEIGHT || SNEKFOOD.y > SCREENHEIGHT -3){
+            seed_time += 1;
+            new_snek_food_location();
+        }
+    }
+
+    // Check snek collide
+    if (snek_suicide()){
+        LIVES -= 1;
+        DIRECTION = IDLE;
+        reset();
+        return;
+    }
+
     move_snek_body();
 
     // Directions
@@ -228,17 +288,23 @@ void update_game()
     }
 
     // Check boundaries
-    if (SNEK[0].x < 3){
-        SNEK[0].x = SCREENWIDTH-3;
+    // +3 because can't be 0'
+    if (SNEK[0].x < STARTSCREENWIDTH)
+    {
+        SNEK[0].x = SCREENWIDTH - 3;
     }
-    if (SNEK[0].x > SCREENWIDTH-3){
-        SNEK[0].x = 3;
+    if (SNEK[0].x > SCREENWIDTH - 3)
+    {
+        SNEK[0].x = STARTSCREENWIDTH;
     }
-    if (SNEK[0].y < 3){
-        SNEK[0].y = SCREENHEIGHT-3;
+
+    if (SNEK[0].y < STARTSCREENHEIGHT)
+    {
+        SNEK[0].y = SCREENHEIGHT - 3;
     }
-    if (SNEK[0].y > SCREENHEIGHT-3){
-        SNEK[0].y = 3;
+    if (SNEK[0].y > SCREENHEIGHT - 3)
+    {
+        SNEK[0].y = STARTSCREENHEIGHT;
     }
 }
 
@@ -258,12 +324,15 @@ int main(void)
         get_inputs();
 
         // Update game engine
-        update_game();
+        if (DIRECTION != IDLE){
+            update_game();
+        }
 
         // update screen
         update_screen();
 
         _delay_ms(DELAY);
+        seed_time += 1;
     }
 
     return 0;
