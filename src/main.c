@@ -34,8 +34,8 @@ struct Snek
 #define SNEKWIDTH 3
 #define STARTSCREENHEIGHT 12
 #define STARTSCREENWIDTH 3
-#define SCREENWIDTH 84
-#define SCREENHEIGHT 48
+#define SCREENWIDTH LCD_X 
+#define SCREENHEIGHT LCD_Y
 unsigned char GAME_OVER = 0;
 unsigned char LIVES = 5;
 unsigned char SCORE = 0;
@@ -44,6 +44,10 @@ int seed_time = 42;
 enum Directions DIRECTION;
 struct Snek SNEK[SNEKMAXSIZE];
 struct Snek SNEKFOOD;
+unsigned char DISPLAYWALL = 0; 
+struct Snek WALLONE[2]; 
+struct Snek WALLTWO[2];
+struct Snek WALLTHREE[2];
 
 // Analogue read
 uint16_t adc_read(uint8_t ch) {
@@ -137,6 +141,30 @@ unsigned char snek_suicide()
     return 0;
 }
 
+// Checks if anything collided with wall
+unsigned char collide_wall(unsigned char sx, unsigned char sy, unsigned char x, unsigned char y1, unsigned char y2){
+    if (sx >= x-SNEKWIDTH && sx <= x + SNEKWIDTH){
+        if (sy >= y1 && sy <= y2){
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Checks if something collided with all walls
+unsigned char collide_walls(unsigned char sx, unsigned char sy){
+    if (collide_wall(sx, sy, WALLONE[0].x, WALLONE[0].y, WALLONE[1].y) == 1){
+        return 1;
+    }
+    if (collide_wall(sx, sy, WALLTWO[0].x, WALLTWO[0].y, WALLTWO[1].y) == 1){
+        return 1;
+    }
+    if (collide_wall(sx, sy, WALLTHREE[0].x, WALLTHREE[0].y, WALLTHREE[1].y) == 1){
+        return 1;
+    }
+    return 0;
+}
+
 // Checks if newly spawn food is in snek
 // can't have that can we
 unsigned char is_food_in_snek()
@@ -223,6 +251,22 @@ void setup()
 
     // Reset snek position
     reset();
+
+    // Setup level 3 walls
+    WALLONE[0].x = 10;
+    WALLONE[0].y = 30;
+    WALLONE[1].x = 10;
+    WALLONE[1].y = SCREENHEIGHT;
+
+    WALLTWO[0].x = SCREENWIDTH - 10;
+    WALLTWO[0].y = 30;
+    WALLTWO[1].x = SCREENWIDTH - 10;
+    WALLTWO[1].y = SCREENHEIGHT;
+
+    WALLTHREE[0].x = 40;
+    WALLTHREE[0].y = STARTSCREENHEIGHT;
+    WALLTHREE[1].x = 40;
+    WALLTHREE[1].y = 30;
 }
 
 // Show stats
@@ -249,6 +293,13 @@ void show_status()
     draw_line(0, 10, SCREENWIDTH, 10);
 }
 
+// Draw level 3 walls
+void draw_walls(){
+    draw_line(WALLONE[0].x, WALLONE[0].y, WALLONE[1].x, WALLONE[1].y);
+    draw_line(WALLTWO[0].x, WALLTWO[0].y, WALLTWO[1].x, WALLTWO[1].y);
+    draw_line(WALLTHREE[0].x, WALLTHREE[0].y, WALLTHREE[1].x, WALLTHREE[1].y);
+}
+
 // Update Screen
 // All draw functions will be called here
 void update_screen()
@@ -258,6 +309,11 @@ void update_screen()
     draw_snek_food();
     draw_snek();
     show_status();
+
+    if (DISPLAYWALL == 1){
+        draw_walls();
+    }
+    
 
     show_screen();
 }
@@ -289,6 +345,20 @@ ISR(TIMER0_OVF_vect)
     {
         DIRECTION = UP;
     }
+
+    // SW2
+    if ((PINF >> 6) & 1){
+        // despawn walls
+        DISPLAYWALL = 0;
+    }
+
+    // SW2
+    if ((PINF >> 5) & 1){
+        // spawn walls
+        DISPLAYWALL = 1;
+    }
+
+    }
 }
 
 // Updates game engine
@@ -299,11 +369,14 @@ void update_game()
     {
 
         SCORE += 1;
+        if (DISPLAYWALL){
+            SCORE += 1;
+        }
         SNEK_CUR_LENGTH += 1;
         new_snek_food_location();
 
         //check new snek food location
-        while (is_food_in_snek() || SNEKFOOD.x <= STARTSCREENWIDTH || SNEKFOOD.x >= SCREENWIDTH - 3 || SNEKFOOD.y <= STARTSCREENHEIGHT || SNEKFOOD.y >= SCREENHEIGHT - 3)
+        while ( (DISPLAYWALL == 1 && collide_walls(SNEKFOOD.x, SNEKFOOD.y)) || is_food_in_snek() || SNEKFOOD.x <= STARTSCREENWIDTH || SNEKFOOD.x >= SCREENWIDTH - 3 || SNEKFOOD.y <= STARTSCREENHEIGHT || SNEKFOOD.y >= SCREENHEIGHT - 3)
         {
             seed_time += 1;
             new_snek_food_location();
@@ -311,11 +384,18 @@ void update_game()
     }
 
     // Check snek collide
-    if (snek_suicide())
+    if (snek_suicide() || (DISPLAYWALL == 1 && collide_walls(SNEK[0].x, SNEK[0].y)))
     {
         LIVES -= 1;
         DIRECTION = IDLE;
         reset();
+        //check new snek food location
+        while (is_food_in_snek() || SNEKFOOD.x <= STARTSCREENWIDTH || SNEKFOOD.x >= SCREENWIDTH - 3 || SNEKFOOD.y <= STARTSCREENHEIGHT || SNEKFOOD.y >= SCREENHEIGHT - 3)
+        {
+            seed_time += 1;
+            new_snek_food_location();
+        }
+ 
         return;
     }
 
@@ -407,7 +487,6 @@ int main(void)
             _delay_ms(300);
         }
         
-
         seed_time += 1;
     }
 

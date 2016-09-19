@@ -398,13 +398,13 @@
  349               		.file 5 "graphics.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 sprite.c
-     /tmp/ccSMPcGr.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/ccSMPcGr.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/ccSMPcGr.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/ccSMPcGr.s:5      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/ccSMPcGr.s:6      *ABS*:0000000000000001 __zero_reg__
-     /tmp/ccSMPcGr.s:13     .text.init_sprite:0000000000000000 init_sprite
-     /tmp/ccSMPcGr.s:103    .text.draw_sprite:0000000000000000 draw_sprite
+     /tmp/ccSr0ZAN.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccSr0ZAN.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccSr0ZAN.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccSr0ZAN.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccSr0ZAN.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccSr0ZAN.s:13     .text.init_sprite:0000000000000000 init_sprite
+     /tmp/ccSr0ZAN.s:103    .text.draw_sprite:0000000000000000 draw_sprite
 
 UNDEFINED SYMBOLS
 __floatsisf

@@ -1501,19 +1501,19 @@
  1384               		.file 4 "lcd.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 graphics.c
-     /tmp/ccLNzZZJ.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/ccLNzZZJ.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/ccLNzZZJ.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/ccLNzZZJ.s:5      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/ccLNzZZJ.s:6      *ABS*:0000000000000001 __zero_reg__
-     /tmp/ccLNzZZJ.s:13     .text.show_screen:0000000000000000 show_screen
+     /tmp/ccLW96bG.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccLW96bG.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccLW96bG.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccLW96bG.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccLW96bG.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccLW96bG.s:13     .text.show_screen:0000000000000000 show_screen
                             *COM*:00000000000001f8 screen_buffer
-     /tmp/ccLNzZZJ.s:62     .text.clear_screen:0000000000000000 clear_screen
-     /tmp/ccLNzZZJ.s:92     .text.set_pixel:0000000000000000 set_pixel
-     /tmp/ccLNzZZJ.s:176    .text.draw_line:0000000000000000 draw_line
-     /tmp/ccLNzZZJ.s:654    .text.draw_char:0000000000000000 draw_char
-     /tmp/ccLNzZZJ.s:899    .progmem.data:0000000000000000 ASCII
-     /tmp/ccLNzZZJ.s:836    .text.draw_string:0000000000000000 draw_string
+     /tmp/ccLW96bG.s:62     .text.clear_screen:0000000000000000 clear_screen
+     /tmp/ccLW96bG.s:92     .text.set_pixel:0000000000000000 set_pixel
+     /tmp/ccLW96bG.s:176    .text.draw_line:0000000000000000 draw_line
+     /tmp/ccLW96bG.s:654    .text.draw_char:0000000000000000 draw_char
+     /tmp/ccLW96bG.s:899    .progmem.data:0000000000000000 ASCII
+     /tmp/ccLW96bG.s:836    .text.draw_string:0000000000000000 draw_string
 
 UNDEFINED SYMBOLS
 lcd_position

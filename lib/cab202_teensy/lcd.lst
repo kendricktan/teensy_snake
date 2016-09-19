@@ -345,14 +345,14 @@
  252               		.file 3 "ascii_font.h"
 DEFINED SYMBOLS
                             *ABS*:0000000000000000 lcd.c
-     /tmp/ccSiZwAn.s:2      *ABS*:000000000000003e __SP_H__
-     /tmp/ccSiZwAn.s:3      *ABS*:000000000000003d __SP_L__
-     /tmp/ccSiZwAn.s:4      *ABS*:000000000000003f __SREG__
-     /tmp/ccSiZwAn.s:5      *ABS*:0000000000000000 __tmp_reg__
-     /tmp/ccSiZwAn.s:6      *ABS*:0000000000000001 __zero_reg__
-     /tmp/ccSiZwAn.s:13     .text.lcd_write:0000000000000000 lcd_write
-     /tmp/ccSiZwAn.s:81     .text.lcd_init:0000000000000000 lcd_init
-     /tmp/ccSiZwAn.s:169    .text.lcd_clear:0000000000000000 lcd_clear
-     /tmp/ccSiZwAn.s:214    .text.lcd_position:0000000000000000 lcd_position
+     /tmp/ccPK67gM.s:2      *ABS*:000000000000003e __SP_H__
+     /tmp/ccPK67gM.s:3      *ABS*:000000000000003d __SP_L__
+     /tmp/ccPK67gM.s:4      *ABS*:000000000000003f __SREG__
+     /tmp/ccPK67gM.s:5      *ABS*:0000000000000000 __tmp_reg__
+     /tmp/ccPK67gM.s:6      *ABS*:0000000000000001 __zero_reg__
+     /tmp/ccPK67gM.s:13     .text.lcd_write:0000000000000000 lcd_write
+     /tmp/ccPK67gM.s:81     .text.lcd_init:0000000000000000 lcd_init
+     /tmp/ccPK67gM.s:169    .text.lcd_clear:0000000000000000 lcd_clear
+     /tmp/ccPK67gM.s:214    .text.lcd_position:0000000000000000 lcd_position
 
 NO UNDEFINED SYMBOLS
