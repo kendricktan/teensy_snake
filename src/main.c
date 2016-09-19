@@ -69,6 +69,9 @@ uint16_t adc_read(uint8_t ch) {
 	return (ADC);
 }
 
+// prototypes
+void reset();
+
 // Reads pot
 int pot_position() {
 	uint16_t adc = adc_read(1);
@@ -196,6 +199,13 @@ void draw_snek_food()
     draw_snek_body(SNEKFOOD.x, SNEKFOOD.y);
 }
 
+// Snek died
+void snek_ded(){
+    LIVES -= 1;
+    DIRECTION = IDLE;
+    reset();
+}
+
 // Welcome screen
 void welcome_screen()
 {
@@ -218,6 +228,13 @@ void reset()
 
     // Snek food
     new_snek_food_location();
+
+    //check new snek food location
+    while ((DISPLAYWALL == 1 && collide_walls(SNEKFOOD.x, SNEKFOOD.y)) ||is_food_in_snek() || SNEKFOOD.x <= STARTSCREENWIDTH || SNEKFOOD.x >= SCREENWIDTH - 3 || SNEKFOOD.y <= STARTSCREENHEIGHT || SNEKFOOD.y >= SCREENHEIGHT - 3)
+    {
+        seed_time += 1;
+        new_snek_food_location();
+    }
 }
 
 // Setup
@@ -325,24 +342,40 @@ ISR(TIMER0_OVF_vect)
     // Left
     if ((PINB >> 1) & 1)
     {
+        if (DIRECTION == RIGHT){
+            snek_ded();
+            return;
+        }
         DIRECTION = LEFT;
     }
 
     // Right
     if (PIND & 1)
     {
+        if (DIRECTION == LEFT){
+            snek_ded();
+            return;
+        }
         DIRECTION = RIGHT;
     }
 
     // Down
     if ((PINB >> 7) & 1)
     {
+        if (DIRECTION == UP){
+            snek_ded();
+            return;
+        }
         DIRECTION = DOWN;
     }
 
     // Up
     if ((PIND >> 1) & 1)
     {
+        if (DIRECTION == DOWN){
+            snek_ded();
+            return;
+        }
         DIRECTION = UP;
     }
 
@@ -358,7 +391,7 @@ ISR(TIMER0_OVF_vect)
         DISPLAYWALL = 1;
     }
 
-    }
+    
 }
 
 // Updates game engine
@@ -386,16 +419,7 @@ void update_game()
     // Check snek collide
     if (snek_suicide() || (DISPLAYWALL == 1 && collide_walls(SNEK[0].x, SNEK[0].y)))
     {
-        LIVES -= 1;
-        DIRECTION = IDLE;
-        reset();
-        //check new snek food location
-        while (is_food_in_snek() || SNEKFOOD.x <= STARTSCREENWIDTH || SNEKFOOD.x >= SCREENWIDTH - 3 || SNEKFOOD.y <= STARTSCREENHEIGHT || SNEKFOOD.y >= SCREENHEIGHT - 3)
-        {
-            seed_time += 1;
-            new_snek_food_location();
-        }
- 
+        snek_ded();
         return;
     }
 
@@ -441,6 +465,7 @@ void update_game()
     {
         SNEK[0].y = STARTSCREENHEIGHT;
     }
+
 }
 
 // main
@@ -453,7 +478,7 @@ int main(void)
     _delay_ms(2000);
 
     // Game loop
-    while (!GAME_OVER)
+    while (LIVES > 0)
     {
         // Update game engine
         if (DIRECTION != IDLE)
@@ -489,6 +514,10 @@ int main(void)
         
         seed_time += 1;
     }
+
+    clear_screen();
+    draw_string(5, 5, "GAME OVER");
+    show_screen();
 
     return 0;
 }
